@@ -5,6 +5,9 @@ import math
 from scipy.signal import convolve2d
 from skimage.restoration import estimate_sigma
 
+# Mohab Amr Abdelfatah T07  34-5862
+# Abdelrahman Hisham   T07  34-1203
+
 original_noise = 0
 original_blurry = 0
 noise_index = [2, 5, 6, 8]
