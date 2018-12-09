@@ -6,6 +6,9 @@ import math
 # Mohab Amr Abdelfatah T07  34-5862
 # Abdelrahman Hisham   T07  34-1203
 
+# tutorial used
+# https://www.packtpub.com/mapt/book/application_development/9781788474443/9/ch09lvl1sec118/estimating-disparity-maps-for-stereo-images
+# https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_calib3d/py_depthmap/py_depthmap.html#py-depthmap
 left_img = None
 right_img = None
 new_img = None
@@ -22,15 +25,11 @@ def read_images():
     H2, W2 = right_img.shape[:2]
     print(H, W)
     print(H2, W2)
-    W = W - 1
     new_img = [[0 for x in range(W)] for y in range(H)]
     # H = int (H/10)
     # W = int (W/10)
     print(H, W)
-
-    # left_img = [[9, 8, 9, 2], [8, 7, 9, 3], [9, 9, 2, 2], [5, 8, 1, 1]]
-    # right_img = [[2, 3, 1, 3], [2, 8, 7, 8], [1, 9, 8, 9], [1, 9, 8, 2]]
-
+    try_cv_stereo(left_img, right_img)
     # disparity_window(left_img, right_img, 1, 1, (0, 1), (0, 1), 3)
 
     for y in range(0, H):
@@ -38,7 +37,7 @@ def read_images():
             # for each pixel, use the limits to get all pixels in this range and use the min desparity
             # disp range func missing
             x = 1
-            disparity_window(left_img, right_img, new_img, y, x, (0, 1), (0, 1), 7)
+            # disparity_window(left_img, right_img, new_img, y, x, (-75, 0), (0, 0), 7)
     print "finished disp"
     # print new_img
     write_img(new_img)
@@ -66,15 +65,15 @@ def disparity_window(left_img, right_img, new_img, y, x, x_range, y_range, kerne
     if(curr_min != None):
         pix_val = np.clip(curr_min, 0, 255)
         print pix_val
-        new_img[y][x] = pix_val 
+        new_img[y][x] = pix_val
 
     print(choosen_vector)
     print "\n\n"
 
 
-def write_img(new_img):
+def write_img(new_img, name="disparity"):
     imgToWrite = np.array(new_img)
-    cv2.imwrite('./disparity.jpg', imgToWrite)
+    cv2.imwrite('./'+name+'.jpg', imgToWrite)
 
 
 def get_ssd(left_img, right_img, left_y, left_x, right_y, right_x, kernel_size):
@@ -100,6 +99,32 @@ def get_ssd(left_img, right_img, left_y, left_x, right_y, right_x, kernel_size):
             except IndexError:
                 return None
     return diff_sum
+
+def try_cv_stereo(left_img, right_img):
+    stereo_bm = cv2.StereoBM_create(32)
+    dispmap_bm = stereo_bm.compute(left_img, right_img)
+    write_img(dispmap_bm, 'disparity_auto')
+
+    stereo_sgbm = cv2.StereoSGBM_create(32)
+    dispmap_sgbm = stereo_sgbm.compute(left_img, right_img)
+    write_img(dispmap_sgbm, 'disparity_auto_sg')
+
+    # disparity settings
+    window_size = 7
+    min_disp = 32
+    num_disp = 112-min_disp
+    stereo = cv2.StereoSGBM_create(
+        minDisparity = min_disp,
+        numDisparities = num_disp,
+        uniquenessRatio = 10,
+        speckleWindowSize = 100,
+        speckleRange = 32,
+        disp12MaxDiff = 1,
+        P1 = 8*3*window_size**2,
+        P2 = 32*3*window_size**2,
+    )
+    disparity = stereo.compute(left_img, right_img)
+    write_img(disparity, 'disparity_full')
 
 
 if __name__ == '__main__':
