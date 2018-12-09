@@ -9,6 +9,7 @@ import math
 # tutorial used
 # https://www.packtpub.com/mapt/book/application_development/9781788474443/9/ch09lvl1sec118/estimating-disparity-maps-for-stereo-images
 # https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_calib3d/py_depthmap/py_depthmap.html#py-depthmap
+# https://rdmilligan.wordpress.com/2016/05/23/disparity-of-stereo-images-with-python-and-opencv/
 left_img = None
 right_img = None
 new_img = None
